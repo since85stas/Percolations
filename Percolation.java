@@ -10,11 +10,11 @@
 public class Percolation {
 
     // grid dimension
-    private int gridDimension;
+    public int gridDimension;
 
     private int[][] grid;
 
-    private int lastElementNum;
+    private final int lastElementNum;
 
     private QuickUnionUFWeightedM find;
 
@@ -33,11 +33,11 @@ public class Percolation {
             gridDimension = n;
             grid = new int[n][n];
             find = new  QuickUnionUFWeightedM (lastElementNum + 1);
-            initGrid();
-            open(2,1);
-            open(3,1);
-            open(4,1);
-            boolean percolates = percolates();
+            // initGrid();
+            // open(2,1);
+            // open(3,1);
+            // open(4,1);
+            // boolean percolates = percolates();
             System.out.println("endInit");
         }
         else {
@@ -62,52 +62,85 @@ public class Percolation {
     }
 
     // opens the site (row, col) if it is not open already
-    public void open(int row1, int col1) {
-        int row = row1 -1;
-        int col = col1 -1;
-         if (grid[row][col] != 1) {
-             grid[row][col] = 1;
-             openSitesNumber ++;
-             if (row == 0 ) {
-                 find.union(getNodeId(row, col),0);
-             } else if (row == gridDimension-1) {
-                 find.union(getNodeId(row, col), lastElementNum);
-             } else {
-                 int currId;
-                 int checkId;
-                  if ( grid[row-1][col] == 1 ){
-                      currId = getNodeId(row, col);
-                      checkId = getNodeId(row-1, col);
-                      find.union(currId, checkId);
-                  } else if ( grid[row+1][col] == 1 ){
-                      currId = getNodeId(row, col);
-                      checkId = getNodeId(row+1, col);
-                      find.union(currId, checkId);
-                  } else if (col != 0 && grid[row][col-1] == 1) {
-                      currId = getNodeId(row, col);
-                      checkId = getNodeId(row, col-1);
-                      find.union(currId, checkId);
-                  } else if (col != gridDimension-1 && grid[row][col+1] == 1) {
-                      currId = getNodeId(row, col);
-                      checkId = getNodeId(row, col+1);
-                      find.union(currId, checkId);
-                  }
-             }
-         }
+    public void open(int row, int col) {
+        if ( row > 0 && row <= gridDimension && col > 0 && col <= gridDimension ) {
+            if (!isOpen(row, col)) {
+
+                //
+                openedSite(row, col);
+
+                openSitesNumber++;
+                if (row == 1) {
+                    find.union(getNodeId(row, col), 0);
+                }
+                else if (row == gridDimension ) {
+                    find.union(getNodeId(row, col), lastElementNum);
+                }
+                else {
+                    int currId;
+                    int checkId;
+                    if (row != 1 && isOpen(row-1,col)) {
+                        currId = getNodeId(row, col);
+                        checkId = getNodeId(row - 1, col);
+                        find.union(currId, checkId);
+                    }
+                    if (row != gridDimension  && isOpen(row+1, col )) {
+                        currId = getNodeId(row, col);
+                        checkId = getNodeId(row + 1, col);
+                        find.union(currId, checkId);
+                    }
+                    if (col != 1 && isOpen(row,col - 1)) {
+                        currId = getNodeId(row, col);
+                        checkId = getNodeId(row, col - 1);
+                        find.union(currId, checkId);
+                    }
+                    if (col != gridDimension  && isOpen(row,col + 1)) {
+                        currId = getNodeId(row, col);
+                        checkId = getNodeId(row, col + 1);
+                        find.union(currId, checkId);
+                    }
+                }
+            }
+        } else {
+            System.out.println("row=" + row + " col=" + col);
+            IllegalArgumentException exception = new IllegalArgumentException();
+            throw exception;
+        }
     }
 
     private int getNodeId (int row, int col) {
-        return row *gridDimension + col +1;
+        if ( row > 0 && row <= gridDimension && col > 0 && col <= gridDimension ) {
+            return (row-1) *gridDimension + col ;
+        } else {
+            System.out.println("row=" + row + " col=" + col);
+            IllegalArgumentException exception = new IllegalArgumentException();
+            throw exception;
+        }
     }
 
     // is the site (row, col) open?
     public boolean isOpen(int row, int col) {
-        return grid[row-1][col-1] == 1;
+        if ( row > 0 && row <= gridDimension && col > 0 && col <= gridDimension ) {
+            return grid[row-1][col-1] == 1;
+        } else {
+            System.out.println("row=" + row + " col=" + col);
+            IllegalArgumentException exception = new IllegalArgumentException();
+            throw exception;
+        }
+    }
+
+    private void  openedSite (int row, int col) {
+        grid[row-1][col-1] = 1;
     }
 
     // is the site (row, col) full?
     public boolean isFull(int row, int col) {
-        return false;
+        if ( row > 0 && row <= gridDimension && col > 0 && col <= gridDimension ) {
+            return false;
+        } else {
+            IllegalArgumentException exception = new IllegalArgumentException();
+            throw exception;
+        }
     }
 
     // returns the number of open sites
