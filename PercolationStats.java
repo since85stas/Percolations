@@ -7,96 +7,139 @@
  *
  **************************************************************************** */
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import edu.princeton.cs.algs4.StdRandom;
+import edu.princeton.cs.algs4.StdStats;
+import edu.princeton.cs.algs4.Stopwatch;
 
 public class PercolationStats {
+    // limit
+    private double[] percolationLimit;
 
-    private List<Double> percolationLimit;
+    // n
+    private int nGr;
 
-    private List<Integer> colomns;
+    // timings
+    private int tim;
 
-    private List<Integer> rows;
+    // mean
+    private double mean;
 
+    // stdv
+    private double stdv;
 
-    private int N;
+    // low
+    private double low;
 
-    private int T;
+    // high
+    private double high;
 
     // perform independent trials on an n-by-n grid
     public PercolationStats(int n, int trials) {
+        if (n > 0 && trials > 0) {
+            nGr = n;
+            tim = trials;
 
-        N = n;
-        T = trials;
+            percolationLimit = new double[tim];
 
-        percolationLimit = new ArrayList<>();
-
-        for (int i = 0; i < trials; i++) {
-            Percolation percolation = new Percolation(n);
-            startPercolateTest(percolation);
+            for (int i = 0; i < tim; i++) {
+                Percolation percolation = new Percolation(n);
+                startPercolateTest(percolation, i);
+            }
+            mean = mean();
+            stdv = stddev();
+            low = confidenceLo();
+            high = confidenceHi();
+        } else {
+            IllegalArgumentException exception = new IllegalArgumentException();
+            throw exception;
         }
-        double per = mean();
-        System.out.println("T");
     }
 
-    private void startPercolateTest( Percolation percolation ) {
-        colomns = new ArrayList<>();
-        rows = new ArrayList<>();
+    // starting test
+    private void startPercolateTest(Percolation percolation, int testN) {
+        int [] colomns = new int[nGr*nGr];
+        int [] rows = new int[nGr*nGr];
 
-        for (int i = 1; i <= N; i++) {
-            for (int j = 1; j <= N; j++) {
-                colomns.add(j);
-                rows.add(j);
+        for (int i = 0; i < nGr; i++) {
+            for (int j = 0; j < nGr; j++) {
+                colomns[j + i*nGr]  = j+1;
+                rows[j + i*nGr]  = j+1;
             }
         }
 
-        Random random = new Random();
-        for (int i = 0; i < N*N-1; i++) {
-            int numC = random.nextInt(colomns.size()-1);
-            int numR = random.nextInt(rows.size()-1);
-            int row = rows.get(numR);
-            int col = colomns.get(numC);
+         // StdRandom random = new StdRandom();
+        for (int i = 0; i < nGr*nGr-1; i++) {
+            // int numC = random.nextInt(colomns.size()-1);
+            // int numR = random.nextInt(rows.size()-1);
+            int numC = StdRandom.uniform(colomns.length-1);
+            int numR = StdRandom.uniform(rows.length-1);
+            int row = rows[numR];
+            int col = colomns[numC];
 
-            percolation.open(row,col);
+            percolation.open(row, col);
 
-            colomns.remove(numC);
-            rows.remove(numR);
+            colomns = removeElement(colomns, numC);
+            rows    = removeElement(rows, numR);
+
             if (percolation.percolates()) {
                 break;
             }
         }
         double perl = 1.d *percolation.numberOfOpenSites();
-        percolationLimit.add( perl / (N*N) );
+        percolationLimit[testN] =  perl / (nGr*nGr) ;
+    }
+
+    // removinf elment from array
+    private int[] removeElement(int[] source, int index) {
+        int[] result = new int[source.length - 1];
+        System.arraycopy(source, 0, result, 0, index);
+        if (source.length != index) {
+            System.arraycopy(source, index + 1, result, index, source.length - index - 1);
+        }
+        return result;
     }
 
 
     // sample mean of percolation threshold
     public double mean() {
-        double perlocation = percolationLimit.stream().mapToDouble(Double::doubleValue).sum();
-        return perlocation/T;
+        double perlocation = StdStats.mean(percolationLimit);
+        return perlocation;
     }
 
     // sample standard deviation of percolation threshold
     public double stddev() {
-        return 0.d;
+        return StdStats.stddev(percolationLimit);
     }
 
     // low endpoint of 95% confidence interval
     public double confidenceLo() {
-        return 0.d;
+        double div = mean - 1.96*stdv/Math.sqrt(tim);
+        return div;
     }
 
     // high endpoint of 95% confidence interval
     public double confidenceHi() {
-        return 0.d;
+        double div = mean + 1.96*stdv/Math.sqrt(tim);
+        return div;
     }
 
     // test client (see below)
     public static void main(String[] args) {
-        int n = 200;
-        int trials = 50;
 
-        PercolationStats stats = new PercolationStats(n,trials);
+        PercolationStats stats;
+
+        if (args.length > 0) {
+            int n = Integer.parseInt(args[0]);
+            int trials = Integer.parseInt(args[1]);
+            stats = new PercolationStats(n, trials);
+        } else {
+            int n = 5;
+            int trials = 1000;
+             stats = new PercolationStats(n, trials);
+        }
+        System.out.println("mean                    = " + stats.mean);
+        System.out.println("stddev                  = " + stats.stdv);
+        System.out.println("95% confidence interval = [" + stats.low + ", " + stats.high + ",");
+
     }
 }
