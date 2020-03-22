@@ -6,6 +6,7 @@
      *  Description:  Percolation study case
      *
      **************************************************************************** */
+
     import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
     public class Percolation {
@@ -28,10 +29,10 @@
         // creates n-by-n grid, with all sites initially blocked
         public Percolation(int n) {
             if (n > 0) {
-                lastElementNum = n*n+1;
+                lastElementNum = n * n + 1;
                 gridDimension = n;
                 grid = new int[n][n];
-                find = new  WeightedQuickUnionUF (lastElementNum + 1);
+                find = new WeightedQuickUnionUF(lastElementNum + 1);
             }
             else {
                 IllegalArgumentException exception = new IllegalArgumentException();
@@ -51,35 +52,34 @@
                     if (row == 1) {
                         find.union(getNodeId(row, col), 0);
                     }
-                    else if (row == gridDimension) {
+                    if (row == gridDimension || gridDimension == 1) {
                         find.union(getNodeId(row, col), lastElementNum);
                     }
-                    else {
-                        int currId;
-                        int checkId;
-                        if (isOpen(row-1, col)) {
-                            currId = getNodeId(row, col);
-                            checkId = getNodeId(row - 1, col);
-                            find.union(currId, checkId);
-                        }
-                        if (row != gridDimension  && isOpen(row+1, col)) {
-                            currId = getNodeId(row, col);
-                            checkId = getNodeId(row + 1, col);
-                            find.union(currId, checkId);
-                        }
-                        if (col != 1 && isOpen(row,col - 1)) {
-                            currId = getNodeId(row, col);
-                            checkId = getNodeId(row, col - 1);
-                            find.union(currId, checkId);
-                        }
-                        if (col != gridDimension  && isOpen(row,col + 1)) {
-                            currId = getNodeId(row, col);
-                            checkId = getNodeId(row, col + 1);
-                            find.union(currId, checkId);
-                        }
+                    int currId;
+                    int checkId;
+                    if (row != 1 && isOpen(row - 1, col)) {
+                        currId = getNodeId(row, col);
+                        checkId = getNodeId(row - 1, col);
+                        find.union(currId, checkId);
+                    }
+                    if (row != gridDimension && isOpen(row + 1, col)) {
+                        currId = getNodeId(row, col);
+                        checkId = getNodeId(row + 1, col);
+                        find.union(currId, checkId);
+                    }
+                    if (col != 1 && isOpen(row, col - 1)) {
+                        currId = getNodeId(row, col);
+                        checkId = getNodeId(row, col - 1);
+                        find.union(currId, checkId);
+                    }
+                    if (col != gridDimension && isOpen(row, col + 1)) {
+                        currId = getNodeId(row, col);
+                        checkId = getNodeId(row, col + 1);
+                        find.union(currId, checkId);
                     }
                 }
-            } else {
+            }
+            else {
                 IllegalArgumentException exception = new IllegalArgumentException();
                 throw exception;
             }
@@ -88,8 +88,9 @@
         // node id
         private int getNodeId(int row, int col) {
             if (row > 0 && row <= gridDimension && col > 0 && col <= gridDimension) {
-                return (row-1) *gridDimension + col;
-            } else {
+                return (row - 1) * gridDimension + col;
+            }
+            else {
                 IllegalArgumentException exception = new IllegalArgumentException();
                 throw exception;
             }
@@ -98,24 +99,25 @@
         // is the site (row, col) open?
         public boolean isOpen(int row, int col) {
             if (row > 0 && row <= gridDimension && col > 0 && col <= gridDimension) {
-                return grid[row-1][col-1] == 1;
-            } else {
-                System.out.println("row=" + row + " col=" + col);
+                return grid[row - 1][col - 1] == 1;
+            }
+            else {
                 IllegalArgumentException exception = new IllegalArgumentException();
                 throw exception;
             }
         }
 
         // opennig a site
-        private void  openedSite(int row, int col) {
-            grid[row-1][col-1] = 1;
+        private void openedSite(int row, int col) {
+            grid[row - 1][col - 1] = 1;
         }
 
         // is the site (row, col) full?
         public boolean isFull(int row, int col) {
             if (row > 0 && row <= gridDimension && col > 0 && col <= gridDimension) {
-                return isOpen(row, col) && find.connected(getNodeId(row, col),0);
-            } else {
+                return isOpen(row, col) && find.connected(getNodeId(row, col), 0);
+            }
+            else {
                 IllegalArgumentException exception = new IllegalArgumentException();
                 throw exception;
             }

@@ -6,10 +6,8 @@
  *  Description:  Percolation study case
  *
  **************************************************************************** */
-
 import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
-import edu.princeton.cs.algs4.Stopwatch;
 
 public class PercolationStats {
     // limit
@@ -27,28 +25,19 @@ public class PercolationStats {
     // stdv
     private double stdv;
 
-    // low
-    private double low;
-
-    // high
-    private double high;
-
     // perform independent trials on an n-by-n grid
     public PercolationStats(int n, int trials) {
         if (n > 0 && trials > 0) {
             nGr = n;
             tim = trials;
-
             percolationLimit = new double[tim];
 
             for (int i = 0; i < tim; i++) {
                 Percolation percolation = new Percolation(n);
                 startPercolateTest(percolation, i);
             }
-            mean = mean();
-            stdv = stddev();
-            low = confidenceLo();
-            high = confidenceHi();
+            // mean = mean();
+            // stdv = stddev();
         } else {
             IllegalArgumentException exception = new IllegalArgumentException();
             throw exception;
@@ -125,7 +114,6 @@ public class PercolationStats {
 
     // test client (see below)
     public static void main(String[] args) {
-
         PercolationStats stats;
 
         if (args.length > 0) {
@@ -137,9 +125,19 @@ public class PercolationStats {
             int trials = 1000;
              stats = new PercolationStats(n, trials);
         }
-        System.out.println("mean                    = " + stats.mean);
-        System.out.println("stddev                  = " + stats.stdv);
-        System.out.println("95% confidence interval = [" + stats.low + ", " + stats.high + ",");
 
+        // System.out.println("mean                    = " + stats.mean);
+        // System.out.println("stddev                  = " + stats.stdv);
+        // System.out.println("95% confidence interval = [" + stats.low + ", " + stats.high + ",");
+        //
+        // Percolation percolation = new Percolation(1);
+        // percolation.open(1, 1);
+        // percolation.open(3, 1);
+        // percolation.open(3, 2);
+        // percolation.open(1, 3);
+        // percolation.open(2, 3);
+        // percolation.open(3, 3);
+        // boolean re = percolation.percolates();
+        // System.out.println("");
     }
 }
