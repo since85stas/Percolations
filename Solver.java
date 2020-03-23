@@ -15,7 +15,9 @@ import java.util.List;
 
 public class Solver {
 
-    private List<Board> trace;
+    // private List<Board> trace;
+
+    private SearchNode finalSearch;
 
     private int moves;
 
@@ -23,7 +25,7 @@ public class Solver {
 
     private boolean issolvable = false;
 
-    private int countMP = 0;
+    // private int countMP = 0;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initialBoard) {
@@ -55,20 +57,21 @@ public class Solver {
             MinPQ<SearchNode> minPQtw = new MinPQ<>(comparatorManh);
             // minPQ.insert(initial);
 
-            trace = new ArrayList<>();
+            // trace = new ArrayList<>();
             SearchNode initial = new SearchNode(initialBoard, 0, null, initialBoard.manhattan());
             SearchNode minBoard = initial;
             minPQ.insert(initial);
             // SearchNode previousBoard;
 
-            SearchNode initialTw = new SearchNode(initialBoard.twin(), 0, null, initialBoard.twin().manhattan());
-            SearchNode minBoardTw = initial;
+            Board twin = initialBoard.twin();
+            SearchNode initialTw = new SearchNode(twin, 0, null, twin.manhattan());
+            SearchNode minBoardTw = initialTw;
             minPQtw.insert(initialTw);
             // SearchNode previousBoardTw;
-            countMP = 0;
+            int countMP = 0;
 
-            while (!minBoard.board.isGoal() && !minBoardTw.board.isGoal() && !issolvable  ) {
-                countMP++;
+            while (!minBoard.board.isGoal() && !minBoardTw.board.isGoal() ) {
+                // countMP++;
                 // if (countMP > 10000) System.out.println("big c 0");
                 // previousBoard = minBoard;
                 // previousBoardTw = minBoardTw;
@@ -76,6 +79,8 @@ public class Solver {
                 minBoard = minPQ.delMin();
                 // System.out.println("0 "+minBoard.board.toString());
                 minBoardTw = minPQtw.delMin();
+
+                if (minBoard.board.isGoal() || minBoardTw.board.isGoal()) break;
 
                 // Iterable<Board> iterable = minBoard.board.neighbors();
                 // while (iterable.iterator().hasNext()) {
@@ -96,40 +101,39 @@ public class Solver {
                 int neigC = 0;
                 for (Board b : minBoard.board.neighbors()
                         ) {
+                    int nextMoves = minBoard.moves + 1;
                     if (minBoard.previous != null) {
                         if (!b.equals(minBoard.previous.board)) {
                             countMP++;
-                            minPQ.insert(new SearchNode(b, ++minBoard.previous.moves, minBoard, minBoard.manh));
+                            minPQ.insert(new SearchNode(b, nextMoves, minBoard, b.manhattan()));
                             // System.out.println(b.toString());
                         }
                     } else {
                         countMP++;
-                        minPQ.insert(new SearchNode(b, 1, minBoard, minBoard.manh));
+                        minPQ.insert(new SearchNode(b, 1, minBoard, b.manhattan()));
                     }
                 }
 
                 for (Board b : minBoardTw.board.neighbors()
                 ) {
-                    if (minBoardTw.previous!=null) {
+                    int nextMoves = minBoardTw.moves + 1;
+                    if (minBoardTw.previous != null) {
                         if (!b.equals(minBoardTw.previous.board)) {
                             countMP++;
-                            minPQtw.insert(new SearchNode(b, ++minBoardTw.previous.moves, minBoardTw, minBoardTw.manh));
+                            minPQtw.insert(new SearchNode(b, nextMoves, minBoardTw, b.manhattan()));
                             // System.out.println(b.toString());
                         }
                     } else {
                         countMP++;
-                        minPQtw.insert(new SearchNode(b, 1, minBoardTw, minBoardTw.manh));
+                        minPQtw.insert(new SearchNode(b, 1, minBoardTw, b.manhattan()));
                     }
                 }
             }
-            moves = -1;
             if (minBoard.board.isGoal() ) {
                 issolvable = true;
-                do {
-                    trace.add(minBoard.board);
-                    minBoard = minBoard.previous;
-                    moves++;
-                } while (minBoard != null);
+                finalSearch = minBoard;
+                moves = finalSearch.moves;
+
             } else if (minBoardTw.board.isGoal()) {
                 issolvable = false;
             } else {
@@ -172,17 +176,24 @@ public class Solver {
 
     // sequence of boards in a shortest solution
     public Iterable<Board> solution() {
-        List<Board> reverse = new ArrayList<>();
-        for (int i = trace.size()-1; i >=0 ; i--) {
-            reverse.add(trace.get(i));
-        }
-        System.out.println("end");
-        return new Iterable<Board>() {
-            @Override
-            public Iterator<Board> iterator() {
-                return reverse.iterator();
+        List<Board> trace = new ArrayList<>();
+        do {
+            trace.add(finalSearch.board);
+            finalSearch = finalSearch.previous;
+        } while (finalSearch != null);
+        if (isSolvable()) {
+            List<Board> reverse = new ArrayList<>();
+            for (int i = trace.size() - 1; i >= 0; i--) {
+                reverse.add(trace.get(i));
             }
-        };
+            // System.out.println("end");
+            return new Iterable<Board>() {
+                @Override
+                public Iterator<Board> iterator() {
+                    return reverse.iterator();
+                }
+            };
+        } else return null;
 
     }
 

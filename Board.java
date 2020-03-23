@@ -12,7 +12,7 @@ public class Board {
 
     private int[][] tiles;
 
-    private int[] tilesArr;
+    // private int[] tilesArr;
 
     private int N;
 
@@ -30,37 +30,11 @@ public class Board {
     public Board(int[][] tiles) {
         this.tiles = tiles;
         N = tiles.length;
-        tilesArr = new int[N * N - 1];
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 int oldI = i * N + j;
                 if (tiles[i][j] == 0) nullPosition = oldI;
-                if ( !(i == N - 1 && j == N - 1) ) tilesArr[oldI] = tiles[i][j];
             }
-        }
-
-        if (manhattan() == -1) {
-            int count = 0;
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < N; j++) {
-                    int val = tiles[i][j] - 1;
-                    if (val != -1) {
-                        int jRef = (val) % N;
-                        int iRef = (val) / N;
-                        count += Math.abs(iRef - i) + Math.abs(jRef - j);
-                    }
-                }
-            }
-            manh = count;
-        }
-
-        if (hamming() == -1) {
-            int count = 0;
-            for (int i = 0; i < tilesArr.length; i++) {
-                int desNum = i + 1;
-                if (tilesArr[i] != desNum) count++;
-            }
-            humm = count;
         }
     }
 
@@ -84,14 +58,24 @@ public class Board {
 
     // number of tiles out of place
     public int hamming() {
-        // if (humm == 0) {
-        //     int count = 0;
-        //     for (int i = 0; i < tilesArr.length; i++) {
-        //         int desNum = i + 1;
-        //         if (tilesArr[i] != desNum) count++;
-        //     }
-        //     humm = count;
-        // }
+        // int humm = -1;
+
+        if (humm == -1) {
+            int[] tilesArr = new int[N * N - 1];
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
+                    int oldI = i * N + j;
+                    // if (tiles[i][j] == 0) nullPosition = oldI;
+                    if ( !(i == N - 1 && j == N - 1) ) tilesArr[oldI] = tiles[i][j];
+                }
+            }
+            int count = 0;
+            for (int i = 0; i < tilesArr.length; i++) {
+                int desNum = i + 1;
+                if (tilesArr[i] != desNum) count++;
+            }
+            humm = count;
+        }
         return humm;
     }
 
@@ -109,6 +93,21 @@ public class Board {
             //     }
             // }
             // manh = count;
+        // int manh = -1;
+        if (manh == -1) {
+            int count = 0;
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
+                    int val = tiles[i][j] - 1;
+                    if (val != -1) {
+                        int jRef = (val) % N;
+                        int iRef = (val) / N;
+                        count += Math.abs(iRef - i) + Math.abs(jRef - j);
+                    }
+                }
+            }
+            manh = count;
+        }
         return manh;
     }
 
@@ -133,7 +132,6 @@ public class Board {
         return this.N == board.N &&
                 Arrays.deepEquals(this.tiles, board.tiles);
                 // Arrays.equals(tilesArr, board.tilesArr);
-
     }
 
     // all neighboring boards
